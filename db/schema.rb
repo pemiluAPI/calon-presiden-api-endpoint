@@ -11,7 +11,22 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140528071350) do
+ActiveRecord::Schema.define(version: 20140602094752) do
+
+  create_table "events_president_tags", force: true do |t|
+    t.string "id_schedule"
+    t.string "tag"
+  end
+
+  create_table "events_presidents", force: true do |t|
+    t.string "id_calon"
+    t.string "judul"
+    t.string "deskripsi"
+    t.string "tanggal_mulai"
+    t.string "waktu_mulai"
+    t.string "tanggal_selesai"
+    t.string "waktu_selesai"
+  end
 
   create_table "president_candidates", force: true do |t|
     t.integer "tahun"
@@ -33,6 +48,20 @@ ActiveRecord::Schema.define(version: 20140528071350) do
     t.string  "provinsi_tinggal"
   end
 
+  create_table "promises_president_tags", force: true do |t|
+    t.string "id_janji"
+    t.string "tag"
+  end
+
+  create_table "promises_presidents", force: true do |t|
+    t.string "id_calon"
+    t.string "context_janji"
+    t.string "janji"
+    t.string "tanggal"
+    t.string "judul_sumber"
+    t.string "url_sumber"
+  end
+
   create_table "riwayat_pekerjaan_presidens", force: true do |t|
     t.string "id_calon"
     t.string "ringkasan"
@@ -45,6 +74,19 @@ ActiveRecord::Schema.define(version: 20140528071350) do
     t.string "ringkasan"
     t.string "tanggal_mulai"
     t.string "tanggal_selesai"
+  end
+
+  create_table "videos_president_tags", force: true do |t|
+    t.string "id_video"
+    t.string "tag"
+  end
+
+  create_table "videos_presidents", force: true do |t|
+    t.string "id_calon"
+    t.string "judul"
+    t.string "url_video"
+    t.string "tanggal_direkam"
+    t.string "tanggal_upload"
   end
 
 end

@@ -104,5 +104,230 @@ module Pemilu
         end
       end
     end
+    
+    resource :events do     
+      
+      desc "Return all Events"
+      get do
+        events = arr_capres = Array.new
+        capres = params[:id_calon].split(',') unless params[:id_calon].nil?
+        tags = params[:tags].split(',') unless params[:tags].nil?
+#        EventsPresident.all.each do |cap|
+#          arr_capres << cap.id_calon
+#        end
+#        r = arr_capres.grep(/jk/)
+#        raise r.inspect
+        
+        
+        # Set default limit
+        limit = (params[:limit].to_i == 0 || params[:limit].empty?) ? 50 : params[:limit]
+        
+        by_capres_search = ["id_calon like ?","%#{params[:id_calon]}%"] unless params[:id_calon].nil?
+        by_tags_search = ["events_president_tags.tag in (?)", tags] unless params[:tags].nil?
+        
+        if !params[:after].nil?
+          if !params[:before].nil?
+            by_date_search = ["tanggal_mulai > ? and tanggal_mulai < ?", params[:after], params[:before]]
+          else by_date_search = ["tanggal_mulai > ?", params[:after]]
+          end
+        elsif params[:after].nil?
+          if !params[:before].nil?
+            by_date_search = ["tanggal_mulai < ?", params[:before]]          
+          end
+        end
+        
+        EventsPresident.includes(:events_president_tags)
+          .where(by_capres_search)
+          .where(by_tags_search)
+          .where(by_date_search)
+          .references(:events_president_tags)
+          .limit(limit)
+          .offset(params[:offset])
+          .each do |event|
+            tags_collection = params[:tags].nil? ? event.events_president_tags : EventsPresidentTag.where("id_schedule = ?", event.id)
+            events << {
+              id: event.id,
+              id_calon: event.id_calon,
+              judul: event.judul,
+              deskripsi: event.deskripsi,
+              tanggal_mulai: event.tanggal_mulai,
+              waktu_mulai: event.waktu_mulai,
+              tanggal_selesai: event.tanggal_selesai,
+              waktu_selesai: event.waktu_selesai,
+              tags: tags_collection.map { |tag| tag.tag }
+            }
+          end
+          {
+          results: {
+            count: events.count,
+            total: EventsPresident.includes(:events_president_tags).where(by_capres_search).where(by_tags_search).where(by_date_search).references(:events_president_tags).count,
+            events: events
+          }
+        }
+      end
+      
+      desc "Return a single Event object with all its details"
+      params do
+        requires :id, type: String, desc: "Event ID."
+      end
+      route_param :id do
+        get do
+          event = EventsPresident.find_by(id: params[:id])
+          {
+            results: {
+              count: 1,
+              total: 1,
+              event: [{
+                id: event.id,
+                id_calon: event.id_calon,
+                judul: event.judul,
+                deskripsi: event.deskripsi,
+                tanggal_mulai: event.tanggal_mulai,
+                waktu_mulai: event.waktu_mulai,
+                tanggal_selesai: event.tanggal_selesai,
+                waktu_selesai: event.waktu_selesai,
+                tags: event.events_president_tags.map { |tag| tag.tag }
+              }]
+            }
+          }
+        end
+      end
+    end
+    
+    resource :videos do     
+      
+      desc "Return all Videos"
+      get do
+        videos = Array.new
+        capres = params[:id_calon].split(',') unless params[:id_calon].nil?
+        tags = params[:tags].split(',') unless params[:tags].nil?
+        
+        # Set default limit
+        limit = (params[:limit].to_i == 0 || params[:limit].empty?) ? 50 : params[:limit]
+        
+        by_capres_search = ["id_calon in (?)",capres] unless params[:id_calon].nil?
+        by_tags_search = ["videos_president_tags.tag in (?)", tags] unless params[:tags].nil?        
+        
+        VideosPresident.includes(:videos_president_tags)
+          .where(by_capres_search)
+          .where(by_tags_search)          
+          .references(:videos_president_tags)
+          .limit(limit)
+          .offset(params[:offset])
+          .each do |video|
+            tags_collection = params[:tags].nil? ? video.videos_president_tags : VideosPresidentTag.where("id_video = ?", video.id)
+            videos << {
+              id: video.id,
+              id_calon: video.id_calon,
+              judul: video.judul,
+              url_video: video.url_video,
+              tanggal_direkam: video.tanggal_direkam,
+              tanggal_upload: video.tanggal_upload,
+              tags: tags_collection.map { |tag| tag.tag }
+            }
+          end
+          {
+          results: {
+            count: videos.count,
+            total: VideosPresident.includes(:videos_president_tags).where(by_capres_search).where(by_tags_search).references(:videos_president_tags).count,
+            videos: videos
+          }
+        }
+      end
+      
+      desc "Return a single Video object with all its details"
+      params do
+        requires :id, type: String, desc: "Video ID."
+      end
+      route_param :id do
+        get do
+          video = VideosPresident.find_by(id: params[:id])
+          {
+            results: {
+              count: 1,
+              total: 1,
+              video: [{
+              id: video.id,
+              id_calon: video.id_calon,
+              judul: video.judul,
+              url_video: video.url_video,
+              tanggal_direkam: video.tanggal_direkam,
+              tanggal_upload: video.tanggal_upload,
+              tags: video.videos_president_tags.map { |tag| tag.tag }
+              }]
+            }
+          }
+        end
+      end
+    end
+    
+    resource :promises do     
+      
+      desc "Return all Promises"
+      get do
+        promises = Array.new
+        capres = params[:id_calon].split(',') unless params[:id_calon].nil?
+        tags = params[:tags].split(',') unless params[:tags].nil?
+        
+        # Set default limit
+        limit = (params[:limit].to_i == 0 || params[:limit].empty?) ? 50 : params[:limit]
+        
+        by_capres_search = ["id_calon in (?)",capres] unless params[:id_calon].nil?
+        by_tags_search = ["promises_president_tags.tag in (?)", tags] unless params[:tags].nil?        
+        
+        PromisesPresident.includes(:promises_president_tags)
+          .where(by_capres_search)
+          .where(by_tags_search)          
+          .references(:promises_president_tags)
+          .limit(limit)
+          .offset(params[:offset])
+          .each do |promise|
+            tags_collection = params[:tags].nil? ? promise.promises_president_tags : PromisesPresidentTag.where("id_janji = ?", promise.id)
+            promises << {
+              id: promise.id,
+              id_calon: promise.id_calon,
+              context_janji: promise.context_janji,
+              janji: promise.janji,
+              tanggal: promise.tanggal,
+              judul_sumber: promise.judul_sumber,
+              url_sumber: promise.url_sumber,
+              tags: tags_collection.map { |tag| tag.tag }
+            }
+          end
+          {
+          results: {
+            count: promises.count,
+            total: PromisesPresident.includes(:promises_president_tags).where(by_capres_search).where(by_tags_search).references(:promises_president_tags).count,
+            promises: promises
+          }
+        }
+      end
+      
+      desc "Return a single Promise object with all its details"
+      params do
+        requires :id, type: String, desc: "Promise ID."
+      end
+      route_param :id do
+        get do
+          promise = PromisesPresident.find_by(id: params[:id])
+          {
+            results: {
+              count: 1,
+              total: 1,
+              promise: [{
+              id: promise.id,
+              id_calon: promise.id_calon,
+              context_janji: promise.context_janji,
+              janji: promise.janji,
+              tanggal: promise.tanggal,
+              judul_sumber: promise.judul_sumber,
+              url_sumber: promise.url_sumber,
+              tags: promise.promises_president_tags.map { |tag| tag.tag }
+              }]
+            }
+          }
+        end
+      end
+    end
   end
 end
