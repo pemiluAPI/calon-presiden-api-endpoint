@@ -193,7 +193,7 @@ module Pemilu
               total: 1,
               event: [{
                 id: event.id,
-                id_calon: event.id_calon,
+                id_calon: event.id_calon.split(','),
                 judul: event.judul,
                 deskripsi: event.deskripsi,
                 tanggal_mulai: event.tanggal_mulai,
