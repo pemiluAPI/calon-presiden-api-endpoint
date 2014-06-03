@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140602094752) do
+ActiveRecord::Schema.define(version: 20140603025446) do
 
   create_table "events_president_tags", force: true do |t|
     t.string "id_schedule"
@@ -31,7 +31,7 @@ ActiveRecord::Schema.define(version: 20140602094752) do
   create_table "president_candidates", force: true do |t|
     t.integer "tahun"
     t.string  "role"
-    t.string  "running_with"
+    t.string  "id_running_mate"
     t.integer "id_partai"
     t.string  "nama_partai"
     t.string  "nama"

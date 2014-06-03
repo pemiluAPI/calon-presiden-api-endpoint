@@ -38,6 +38,8 @@ module Pemilu
               id: capres.id,
               tahun: capres.tahun,
               nama: capres.nama,
+              role: capres.role,
+              id_running_mate: capres.id_running_mate,
               jenis_kelamin: capres.jenis_kelamin,
               agama: capres.agama,
               tempat_lahir: capres.tempat_lahir,
@@ -81,6 +83,8 @@ module Pemilu
                 id: capres.id,
                 tahun: capres.tahun,
                 nama: capres.nama,
+                role: capres.role,
+                id_running_mate: capres.id_running_mate,
                 jenis_kelamin: capres.jenis_kelamin,
                 agama: capres.agama,
                 tempat_lahir: capres.tempat_lahir,
@@ -109,58 +113,68 @@ module Pemilu
       
       desc "Return all Events"
       get do
-        events = arr_capres = Array.new
+        events = Array.new
         capres = params[:id_calon].split(',') unless params[:id_calon].nil?
         tags = params[:tags].split(',') unless params[:tags].nil?
-#        EventsPresident.all.each do |cap|
-#          arr_capres << cap.id_calon
-#        end
-#        r = arr_capres.grep(/jk/)
-#        raise r.inspect
-        
         
         # Set default limit
-        limit = (params[:limit].to_i == 0 || params[:limit].empty?) ? 50 : params[:limit]
+        limit = (params[:limit].to_i == 0 || params[:limit].empty?) ? 50 : params[:limit]        
+        by_capres_search_arr = Array.new
+        if !capres.nil?
+          a = 0
+          capres.each do |cap|
+            a += 1
+            condition = "id_calon like '%#{cap}%'" if a == 1
+            condition = "and id_calon like '%#{cap}%'" if a > 1
+            by_capres_search_arr << condition
+          end
+          by_capres_search = by_capres_search_arr.join(" ")
+        end
         
-        by_capres_search = ["id_calon like ?","%#{params[:id_calon]}%"] unless params[:id_calon].nil?
-        by_tags_search = ["events_president_tags.tag in (?)", tags] unless params[:tags].nil?
-        
-        if !params[:after].nil?
+        if params[:after].nil? && params[:before].nil?
+          by_date_search = ["tanggal_mulai >= ?", DateTime.now.to_date]
+        elsif !params[:after].nil?
           if !params[:before].nil?
-            by_date_search = ["tanggal_mulai > ? and tanggal_mulai < ?", params[:after], params[:before]]
-          else by_date_search = ["tanggal_mulai > ?", params[:after]]
+            by_date_search = ["tanggal_mulai >= ? and tanggal_mulai <= ?", params[:after], params[:before]]
+          else by_date_search = ["tanggal_mulai >= ?", params[:after]]
           end
         elsif params[:after].nil?
           if !params[:before].nil?
-            by_date_search = ["tanggal_mulai < ?", params[:before]]          
+            by_date_search = ["tanggal_mulai <= ?", params[:before]]          
           end
         end
         
         EventsPresident.includes(:events_president_tags)
-          .where(by_capres_search)
-          .where(by_tags_search)
+          .where(by_capres_search)          
           .where(by_date_search)
           .references(:events_president_tags)
           .limit(limit)
           .offset(params[:offset])
+          .order(:tanggal_mulai)
           .each do |event|
             tags_collection = params[:tags].nil? ? event.events_president_tags : EventsPresidentTag.where("id_schedule = ?", event.id)
-            events << {
-              id: event.id,
-              id_calon: event.id_calon,
-              judul: event.judul,
-              deskripsi: event.deskripsi,
-              tanggal_mulai: event.tanggal_mulai,
-              waktu_mulai: event.waktu_mulai,
-              tanggal_selesai: event.tanggal_selesai,
-              waktu_selesai: event.waktu_selesai,
-              tags: tags_collection.map { |tag| tag.tag }
-            }
+            tags_data = tags_collection.map { |tag| tag.tag }
+            s_tag_data = Set.new tags_data
+            s_tags = Set.new tags
+            res = s_tags.subset? s_tag_data
+            if (res == true)
+              events << {
+                id: event.id,
+                id_calon: event.id_calon.split(','),
+                judul: event.judul,
+                deskripsi: event.deskripsi,
+                tanggal_mulai: event.tanggal_mulai,
+                waktu_mulai: event.waktu_mulai,
+                tanggal_selesai: event.tanggal_selesai,
+                waktu_selesai: event.waktu_selesai,
+                tags: tags_data
+              }
+            end
           end
           {
           results: {
             count: events.count,
-            total: EventsPresident.includes(:events_president_tags).where(by_capres_search).where(by_tags_search).where(by_date_search).references(:events_president_tags).count,
+            total: events.count,
             events: events
           }
         }
