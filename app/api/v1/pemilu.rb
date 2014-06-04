@@ -57,7 +57,9 @@ module Pemilu
               },
               biografi: capres.biografi,
               riwayat_pendidikan: capres.riwayat_pendidikan_presidens,
-              riwayat_pekerjaan: capres.riwayat_pekerjaan_presidens
+              riwayat_pekerjaan: capres.riwayat_pekerjaan_presidens,
+              riwayat_organisasi: capres.riwayat_organisasi_presidens,
+              riwayat_penghargaan: capres.riwayat_penghargaan_presidens
             }
           end
           {
@@ -103,7 +105,9 @@ module Pemilu
                 },
                 biografi: capres.biografi,
                 riwayat_pendidikan: capres.riwayat_pendidikan_presidens,
-                riwayat_pekerjaan: capres.riwayat_pekerjaan_presidens
+                riwayat_pekerjaan: capres.riwayat_pekerjaan_presidens,
+                riwayat_organisasi: capres.riwayat_organisasi_presidens,
+                riwayat_penghargaan: capres.riwayat_penghargaan_presidens
               }]
             }
           }
