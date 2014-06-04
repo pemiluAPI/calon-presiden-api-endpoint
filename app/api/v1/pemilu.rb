@@ -55,6 +55,7 @@ module Pemilu
                 id: capres.id_partai,
                 nama: capres.nama_partai
               },
+              biografi: capres.biografi,
               riwayat_pendidikan: capres.riwayat_pendidikan_presidens,
               riwayat_pekerjaan: capres.riwayat_pekerjaan_presidens
             }
@@ -100,6 +101,7 @@ module Pemilu
                   id: capres.id_partai,
                   nama: capres.nama_partai
                 },
+                biografi: capres.biografi,
                 riwayat_pendidikan: capres.riwayat_pendidikan_presidens,
                 riwayat_pekerjaan: capres.riwayat_pekerjaan_presidens
               }]
@@ -145,11 +147,9 @@ module Pemilu
         end
         
         EventsPresident.includes(:events_president_tags)
-          .where(by_capres_search)          
+          .where(by_capres_search)
           .where(by_date_search)
           .references(:events_president_tags)
-          .limit(limit)
-          .offset(params[:offset])
           .order(:tanggal_mulai)
           .each do |event|
             tags_collection = params[:tags].nil? ? event.events_president_tags : EventsPresidentTag.where("id_schedule = ?", event.id)
@@ -171,11 +171,12 @@ module Pemilu
               }
             end
           end
+          results = events.take(limit.to_i).drop(params[:offset].to_i)
           {
           results: {
-            count: events.count,
+            count: results.count,
             total: events.count,
-            events: events
+            events: results
           }
         }
       end
@@ -219,12 +220,23 @@ module Pemilu
         # Set default limit
         limit = (params[:limit].to_i == 0 || params[:limit].empty?) ? 50 : params[:limit]
         
-        by_capres_search = ["id_calon in (?)",capres] unless params[:id_calon].nil?
+        by_capres_search_arr = Array.new
+        if !capres.nil?
+          a = 0
+          capres.each do |cap|
+            a += 1
+            condition = "id_calon like '%#{cap}%'" if a == 1
+            condition = "and id_calon like '%#{cap}%'" if a > 1
+            by_capres_search_arr << condition
+          end
+          by_capres_search = by_capres_search_arr.join(" ")
+        end
+        
         by_tags_search = ["videos_president_tags.tag in (?)", tags] unless params[:tags].nil?        
         
         VideosPresident.includes(:videos_president_tags)
           .where(by_capres_search)
-          .where(by_tags_search)          
+          .where(by_tags_search)
           .references(:videos_president_tags)
           .limit(limit)
           .offset(params[:offset])
@@ -232,7 +244,7 @@ module Pemilu
             tags_collection = params[:tags].nil? ? video.videos_president_tags : VideosPresidentTag.where("id_video = ?", video.id)
             videos << {
               id: video.id,
-              id_calon: video.id_calon,
+              id_calon: video.id_calon.split(','),
               judul: video.judul,
               url_video: video.url_video,
               tanggal_direkam: video.tanggal_direkam,
@@ -262,7 +274,7 @@ module Pemilu
               total: 1,
               video: [{
               id: video.id,
-              id_calon: video.id_calon,
+              id_calon: video.id_calon.split(','),
               judul: video.judul,
               url_video: video.url_video,
               tanggal_direkam: video.tanggal_direkam,

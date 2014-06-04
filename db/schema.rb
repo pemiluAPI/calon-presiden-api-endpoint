@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140603025446) do
+ActiveRecord::Schema.define(version: 20140604062735) do
 
   create_table "events_president_tags", force: true do |t|
     t.string "id_schedule"
@@ -46,6 +46,7 @@ ActiveRecord::Schema.define(version: 20140603025446) do
     t.string  "kecamatan_tinggal"
     t.string  "kab_kota_tinggal"
     t.string  "provinsi_tinggal"
+    t.text    "biografi"
   end
 
   create_table "promises_president_tags", force: true do |t|
