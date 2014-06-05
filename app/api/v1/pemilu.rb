@@ -150,6 +150,13 @@ module Pemilu
           end
         end
         
+        unless params[:tags].nil?
+          arr_tags = Array.new
+          tags.each do |tag|
+            arr_tags << tag.tr("_", " ")
+          end
+        end
+        
         EventsPresident.includes(:events_president_tags)
           .where(by_capres_search)
           .where(by_date_search)
@@ -159,7 +166,7 @@ module Pemilu
             tags_collection = params[:tags].nil? ? event.events_president_tags : EventsPresidentTag.where("id_schedule = ?", event.id)
             tags_data = tags_collection.map { |tag| tag.tag }
             s_tag_data = Set.new tags_data
-            s_tags = Set.new tags
+            s_tags = Set.new arr_tags
             res = s_tags.subset? s_tag_data
             if (res == true)
               events << {
