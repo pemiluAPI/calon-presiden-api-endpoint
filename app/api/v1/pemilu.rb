@@ -236,7 +236,13 @@ module Pemilu
           by_capres_search = by_capres_search_arr.join(" ")
         end
         
-        by_tags_search = ["videos_president_tags.tag in (?)", tags] unless params[:tags].nil?        
+        unless params[:tags].nil?
+          arr_tags = Array.new
+          tags.each do |tag|
+            arr_tags << tag.tr("_", " ")
+          end
+          by_tags_search = ["videos_president_tags.tag in (?)", arr_tags]
+        end
         
         VideosPresident.includes(:videos_president_tags)
           .where(by_capres_search)
@@ -303,7 +309,14 @@ module Pemilu
         limit = (params[:limit].to_i == 0 || params[:limit].empty?) ? 50 : params[:limit]
         
         by_capres_search = ["id_calon in (?)",capres] unless params[:id_calon].nil?
-        by_tags_search = ["promises_president_tags.tag in (?)", tags] unless params[:tags].nil?        
+        
+        unless params[:tags].nil?
+          arr_tags = Array.new
+          tags.each do |tag|
+            arr_tags << tag.tr("_", " ")
+          end
+          by_tags_search = ["promises_president_tags.tag in (?)", arr_tags]
+        end
         
         PromisesPresident.includes(:promises_president_tags)
           .where(by_capres_search)
