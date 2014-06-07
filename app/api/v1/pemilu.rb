@@ -138,15 +138,15 @@ module Pemilu
         end
         
         if params[:after].nil? && params[:before].nil?
-          by_date_search = ["tanggal_mulai >= ?", DateTime.now.to_date]
+          by_date_search = ["tanggal_mulai >= ? or tanggal_selesai >= ?", DateTime.now.to_date, DateTime.now.to_date]
         elsif !params[:after].nil?
           if !params[:before].nil?
-            by_date_search = ["tanggal_mulai >= ? and tanggal_mulai <= ?", params[:after], params[:before]]
-          else by_date_search = ["tanggal_mulai >= ?", params[:after]]
+            by_date_search = ["(tanggal_mulai >= ? or tanggal_selesai >= ?) and (tanggal_mulai <= ? or tanggal_selesai <= ?)", params[:after], params[:after], params[:before], params[:before]]
+          else by_date_search = ["tanggal_mulai >= ? or tanggal_selesai >= ?", params[:after], params[:after]]
           end
         elsif params[:after].nil?
           if !params[:before].nil?
-            by_date_search = ["tanggal_mulai <= ?", params[:before]]          
+            by_date_search = ["tanggal_mulai <= ? or tanggal_selesai <= ?", params[:before], params[:before]]
           end
         end
         
