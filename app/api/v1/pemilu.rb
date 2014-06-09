@@ -124,7 +124,7 @@ module Pemilu
         tags = params[:tags].split(',') unless params[:tags].nil?
         
         # Set default limit
-        limit = (params[:limit].to_i == 0 || params[:limit].empty?) ? 50 : params[:limit]        
+        limit = (params[:limit].to_i == 0 || params[:limit].empty?) ? 500 : params[:limit]        
         by_capres_search_arr = Array.new
         if !capres.nil?
           a = 0
@@ -229,7 +229,7 @@ module Pemilu
         tags = params[:tags].split(',') unless params[:tags].nil?
         
         # Set default limit
-        limit = (params[:limit].to_i == 0 || params[:limit].empty?) ? 50 : params[:limit]
+        limit = (params[:limit].to_i == 0 || params[:limit].empty?) ? 500 : params[:limit]
         
         by_capres_search_arr = Array.new
         if !capres.nil?
@@ -313,7 +313,7 @@ module Pemilu
         tags = params[:tags].split(',') unless params[:tags].nil?
         
         # Set default limit
-        limit = (params[:limit].to_i == 0 || params[:limit].empty?) ? 50 : params[:limit]
+        limit = (params[:limit].to_i == 0 || params[:limit].empty?) ? 500 : params[:limit]
         
         by_capres_search = ["id_calon in (?)",capres] unless params[:id_calon].nil?
         
