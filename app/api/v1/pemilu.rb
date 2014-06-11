@@ -4,16 +4,16 @@ module Pemilu
     prefix 'api'
     format :json
 
-    resource :caleg do     
+    resource :caleg do
       
       desc "Return all President Candidates"
       get do
         caleg = Array.new
         
         # Prepare conditions based on params
-        valid_params = {          
-          jenis_kelamin: 'jenis_kelamin',          
-          partai: 'id_partai',          
+        valid_params = {
+          jenis_kelamin: 'jenis_kelamin',
+          partai: 'id_partai',
           tahun: 'tahun'
         }
         conditions = Hash.new
@@ -30,10 +30,10 @@ module Pemilu
         search = ["nama LIKE ? and agama LIKE ?", "%#{params[:nama]}%", "%#{params[:agama]}%"]
         
         PresidentCandidate.where(conditions)
-          .where(search)          
+          .where(search)
           .limit(limit)
           .offset(params[:offset])
-          .each do |capres|            
+          .each do |capres|
             caleg << {
               id: capres.id,
               tahun: capres.tahun,
@@ -115,7 +115,7 @@ module Pemilu
       end
     end
     
-    resource :events do     
+    resource :events do
       
       desc "Return all Events"
       get do
@@ -124,7 +124,7 @@ module Pemilu
         tags = params[:tags].split(',') unless params[:tags].nil?
         
         # Set default limit
-        limit = (params[:limit].to_i == 0 || params[:limit].empty?) ? 500 : params[:limit]        
+        limit = (params[:limit].to_i == 0 || params[:limit].empty?) ? 500 : params[:limit]
         by_capres_search_arr = Array.new
         if !capres.nil?
           a = 0
@@ -220,7 +220,7 @@ module Pemilu
       end
     end
     
-    resource :videos do     
+    resource :videos do
       
       desc "Return all Videos"
       get do
@@ -304,7 +304,7 @@ module Pemilu
       end
     end
     
-    resource :promises do     
+    resource :promises do
       
       desc "Return all Promises"
       get do
@@ -315,7 +315,17 @@ module Pemilu
         # Set default limit
         limit = (params[:limit].to_i == 0 || params[:limit].empty?) ? 500 : params[:limit]
         
-        by_capres_search = ["id_calon in (?)",capres] unless params[:id_calon].nil?
+        by_capres_search_arr = Array.new
+        if !capres.nil?
+          a = 0
+          capres.each do |cap|
+            a += 1
+            condition = "id_calon like '%#{cap}%'" if a == 1
+            condition = "and id_calon like '%#{cap}%'" if a > 1
+            by_capres_search_arr << condition
+          end
+          by_capres_search = by_capres_search_arr.join(" ")
+        end
         
         unless params[:tags].nil?
           arr_tags = Array.new
@@ -327,7 +337,7 @@ module Pemilu
         
         PromisesPresident.includes(:promises_president_tags)
           .where(by_capres_search)
-          .where(by_tags_search)          
+          .where(by_tags_search)
           .references(:promises_president_tags)
           .limit(limit)
           .offset(params[:offset])
@@ -335,7 +345,7 @@ module Pemilu
             tags_collection = params[:tags].nil? ? promise.promises_president_tags : PromisesPresidentTag.where("id_janji = ?", promise.id)
             promises << {
               id: promise.id,
-              id_calon: promise.id_calon,
+              id_calon: promise.id_calon.split(','),
               context_janji: promise.context_janji,
               janji: promise.janji,
               tanggal: promise.tanggal,
@@ -366,7 +376,7 @@ module Pemilu
               total: 1,
               promise: [{
               id: promise.id,
-              id_calon: promise.id_calon,
+              id_calon: promise.id_calon.split(','),
               context_janji: promise.context_janji,
               janji: promise.janji,
               tanggal: promise.tanggal,
