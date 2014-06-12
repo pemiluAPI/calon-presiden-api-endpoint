@@ -315,17 +315,7 @@ module Pemilu
         # Set default limit
         limit = (params[:limit].to_i == 0 || params[:limit].empty?) ? 500 : params[:limit]
         
-        by_capres_search_arr = Array.new
-        if !capres.nil?
-          a = 0
-          capres.each do |cap|
-            a += 1
-            condition = "id_calon like '%#{cap}%'" if a == 1
-            condition = "and id_calon like '%#{cap}%'" if a > 1
-            by_capres_search_arr << condition
-          end
-          by_capres_search = by_capres_search_arr.join(" ")
-        end
+        by_capres_search = ["id_calon in (?)",capres] unless params[:id_calon].nil?
         
         unless params[:tags].nil?
           arr_tags = Array.new
@@ -345,7 +335,7 @@ module Pemilu
             tags_collection = params[:tags].nil? ? promise.promises_president_tags : PromisesPresidentTag.where("id_janji = ?", promise.id)
             promises << {
               id: promise.id,
-              id_calon: promise.id_calon.split(','),
+              id_calon: promise.id_calon,
               context_janji: promise.context_janji,
               janji: promise.janji,
               tanggal: promise.tanggal,
@@ -376,7 +366,7 @@ module Pemilu
               total: 1,
               promise: [{
               id: promise.id,
-              id_calon: promise.id_calon.split(','),
+              id_calon: promise.id_calon,
               context_janji: promise.context_janji,
               janji: promise.janji,
               tanggal: promise.tanggal,
