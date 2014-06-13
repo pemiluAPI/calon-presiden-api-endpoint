@@ -379,5 +379,87 @@ module Pemilu
         end
       end
     end
+    
+    resource :quotes do
+      
+      desc "Return all Quotes"
+      get do
+        quotes = Array.new
+        capres = params[:id_calon].split(',') unless params[:id_calon].nil?
+        tags = params[:tags].split(',') unless params[:tags].nil?
+        
+        # Set default limit
+        limit = (params[:limit].to_i == 0 || params[:limit].empty?) ? 500 : params[:limit]
+        
+        by_capres_search = ["id_calon in (?)",capres] unless params[:id_calon].nil?
+        
+        unless params[:tags].nil?
+          arr_tags = Array.new
+          tags.each do |tag|
+            arr_tags << tag.tr("_", " ")
+          end
+          by_tags_search = ["quotes_presiden_tags.tag in (?)", arr_tags]
+        end
+        
+        QuotesPresident.includes(:quotes_presiden_tags)
+          .where(by_capres_search)
+          .where(by_tags_search)
+          .references(:quotes_presiden_tags)
+          .limit(limit)
+          .offset(params[:offset])
+          .each do |quote|
+            tags_collection = params[:tags].nil? ? quote.quotes_presiden_tags : QuotesPresidenTag.where("id_kutipan = ?", quote.id)
+            quotes << {
+              id: quote.id,
+              id_calon: quote.id_calon,
+              kutipan: quote.kutipan,
+              context_kutipan: quote.context_kutipan,              
+              tanggal: quote.tanggal,
+              nama_sumber: quote.nama_sumber,
+              judul_sumber: quote.judul_sumber,
+              excerpt_sumber: quote.excerpt_sumber,
+              url_sumber: quote.url_sumber,
+              format: quote.format,
+              tags: tags_collection.map { |tag| tag.tag }
+            }
+          end
+          {
+          results: {
+            count: quotes.count,
+            total: QuotesPresident.includes(:quotes_presiden_tags).where(by_capres_search).where(by_tags_search).references(:quotes_presiden_tags).count,
+            quotes: quotes
+          }
+        }
+      end
+      
+      desc "Return a single Quote object with all its details"
+      params do
+        requires :id, type: String, desc: "Quote ID."
+      end
+      route_param :id do
+        get do
+          quote = QuotesPresident.find_by(id: params[:id])
+          {
+            results: {
+              count: 1,
+              total: 1,
+              promise: [{
+              id: quote.id,
+              id_calon: quote.id_calon,
+              kutipan: quote.kutipan,
+              context_kutipan: quote.context_kutipan,              
+              tanggal: quote.tanggal,
+              nama_sumber: quote.nama_sumber,
+              judul_sumber: quote.judul_sumber,
+              excerpt_sumber: quote.excerpt_sumber,
+              url_sumber: quote.url_sumber,
+              format: quote.format,
+              tags: quote.quotes_presiden_tags.map { |tag| tag.tag }
+              }]
+            }
+          }
+        end
+      end
+    end
   end
 end

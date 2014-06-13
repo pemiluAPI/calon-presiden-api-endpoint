@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140604071255) do
+ActiveRecord::Schema.define(version: 20140613031703) do
 
   create_table "events_president_tags", force: true do |t|
     t.string "id_schedule"
@@ -61,6 +61,23 @@ ActiveRecord::Schema.define(version: 20140604071255) do
     t.string "tanggal"
     t.string "judul_sumber"
     t.string "url_sumber"
+  end
+
+  create_table "quotes_presiden_tags", force: true do |t|
+    t.string "id_kutipan"
+    t.string "tag"
+  end
+
+  create_table "quotes_presidents", force: true do |t|
+    t.string "id_calon"
+    t.text   "kutipan"
+    t.text   "context_kutipan"
+    t.string "tanggal"
+    t.string "nama_sumber"
+    t.string "judul_sumber"
+    t.text   "excerpt_sumber"
+    t.string "url_sumber"
+    t.string "format"
   end
 
   create_table "riwayat_organisasi_presidens", force: true do |t|
